@@ -1396,6 +1396,7 @@ body.no-scroll {
   padding: 44px;
   border-radius: var(--radius);
   border: 1px solid var(--cream-2);
+  z-index: 1;
 }
 @media (max-width: 560px) {
   .booking-form {
@@ -2061,4 +2062,8 @@ body {
 .tempo {
   max-width: 32ch;
   opacity: 0.75;
+}
+
+.send-whats {
+  font-size: 10px;
 }

@@ -18,9 +18,9 @@ const Hero = () => {
       </div>
 
       <div className="hero__cta-row">
-        <a href="#" data-page="booking" className="btn btn--primary">
+        <Link to="/booking" data-page="booking" className="btn btn--primary">
           احجزي موعدك الآن
-        </a>
+        </Link>
         <Link to="/works" data-page="works" className="btn btn--ghost">
           شاهدي أعمالنا
         </Link>
