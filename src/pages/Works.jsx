@@ -1,68 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FadeAnimation from "../components/ui/FadeAnimation";
-
-const categories = [
-  { id: "wedding", label: "أعراس" },
-  { id: "engagement", label: "خطوبة" },
-  { id: "graduation", label: "تخرج" },
-  { id: "family", label: "عائلية" },
-  { id: "portrait", label: "بورتريه" },
-];
-
-const GALLERY_ITEMS = [
-  // أعراس
-  {
-    category: "wedding",
-    title: "حفل زفاف — سلمى وأحمد",
-    sub: "Artix Studio، 2026",
-    img: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1100&q=88",
-  },
-  {
-    category: "wedding",
-    title: "حفل زفاف — نور وياسين",
-    sub: "قاعة الزيتونة",
-    img: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1100&q=88",
-  },
-  { category: "wedding", title: "زفة العروسين", sub: "جلسة مسائية", img: "" },
-  {
-    category: "wedding",
-    title: "لحظة تبادل الخواتم",
-    sub: "تصوير حي",
-    img: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1100&q=88",
-  },
-
-  // خطوبة
-  { category: "engagement", title: "جلسة خطوبة — لين وكريم", sub: "جلسة خارجية", img: "" },
-  { category: "engagement", title: "جلسة خطوبة — هبة ووسيم", sub: "حديقة زيتون", img: "" },
-  { category: "engagement", title: "تبادل الدبل", sub: "لقطة مقرّبة", img: "" },
-
-  // تخرج
-  { category: "graduation", title: "حفل تخرج — دفعة 2026", sub: "جامعة بيرزيت", img: "" },
-  { category: "graduation", title: "جلسة تخرج فردية", sub: "داخل الحرم الجامعي", img: "" },
-  { category: "graduation", title: "جلسة تخرج جماعية", sub: "مع صديقات الدفعة", img: "" },
-  {
-    category: "graduation",
-    title: "لحظة رمي القبعة",
-    sub: "تصوير حركي",
-    img: "https://images.unsplash.com/photo-1627556704302-624286467c65?auto=format&fit=crop&w=1100&q=88",
-  },
-
-  // عائلية
-  { category: "family", title: "جلسة عائلية — عائلة النجار", sub: "داخل الاستديو", img: "" },
-  { category: "family", title: "جلسة عائلية — عائلة خليل", sub: "جلسة خارجية", img: "" },
-  { category: "family", title: "جلسة إخوة", sub: "إضاءة طبيعية", img: "" },
-
-  // بورتريه
-  { category: "portrait", title: "بورتريه شخصي — رزان", sub: "إضاءة استديو", img: "" },
-  { category: "portrait", title: "بورتريه تجاري", sub: "هوية شخصية", img: "" },
-  { category: "portrait", title: "جلسة بورتريه فني", sub: "إضاءة درامية", img: "" },
-  { category: "portrait", title: "بورتريه بالأبيض والأسود", sub: "كلاسيكي", img: "" },
-];
+import { getWorks, getCategories } from "../services/firestore";
+import { Link } from "react-router-dom";
 
 const Works = () => {
-  const [activeTab, setActiveTab] = useState(categories[0].id);
-  const [lightboxIndex, setLightboxIndex] = useState(null); // null = مقفول
-  const filteredItems = GALLERY_ITEMS.filter((i) => i.category === activeTab);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [activeTab, setActiveTab] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const [works, categoriesData] = await Promise.all([getWorks(), getCategories()]);
+
+        setGalleryItems(works);
+        setCategories(categoriesData);
+        if (categoriesData.length > 0) {
+          setActiveTab((prev) => prev ?? categoriesData[0].id);
+        }
+      } catch (err) {
+        console.error("فشل تحميل الأعمال أو التصنيفات:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
+  }, []);
+
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const filteredItems = galleryItems.filter((i) => i.category === activeTab);
 
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -84,42 +52,47 @@ const Works = () => {
 
       <section className="section section--tight">
         <div className="container">
-          <FadeAnimation className="filter-bar" id="filter-bar">
-            {categories.map((item) => (
-              <button
-                className={`filter-btn ${activeTab === item.id ? "is-active" : ""}`}
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </FadeAnimation>
-          ;
-          <p className="filter-hint" id="filter-hint">
-            اختاري تصنيفاً من فوق لعرض صوره
-          </p>
-          <FadeAnimation key={activeTab} once={false} className="gallery-grid" id="gallery-grid" aria-live="polite">
-            {filteredItems.map((item, index) => (
-              <article
-                className="gallery-card"
-                key={index}
-                tabIndex={0}
-                role="button"
-                aria-label={`فتح ${item.title}`}
-                onClick={() => openLightbox(index)}
-              >
-                <img src={item.img} alt={item.title} loading="lazy" />
-                <span className="gallery-card__index">
-                  {index + 1}/{filteredItems.length}
-                </span>
-                <div className="gallery-card__info">
-                  <b>{item.title}</b>
-                  <span>{item.sub}</span>
-                </div>
-              </article>
-            ))}
-          </FadeAnimation>
+          {loading ? (
+            <p className="empty-msg">جاري تحميل الأعمال...</p>
+          ) : (
+            <>
+              <FadeAnimation className="filter-bar" id="filter-bar">
+                {categories.map((item) => (
+                  <button
+                    className={`filter-btn ${activeTab === item.id ? "is-active" : ""}`}
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </FadeAnimation>
+              <p className="filter-hint" id="filter-hint">
+                اختاري تصنيفاً من فوق لعرض صوره
+              </p>
+              <FadeAnimation key={activeTab} once={false} className="gallery-grid" id="gallery-grid" aria-live="polite">
+                {filteredItems.map((item, index) => (
+                  <article
+                    className="gallery-card"
+                    key={index}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`فتح ${item.title}`}
+                    onClick={() => openLightbox(index)}
+                  >
+                    <img src={item.img} alt={item.title} loading="lazy" />
+                    <span className="gallery-card__index">
+                      {index + 1}/{filteredItems.length}
+                    </span>
+                    <div className="gallery-card__info">
+                      <b>{item.title}</b>
+                      <span>{item.sub}</span>
+                    </div>
+                  </article>
+                ))}
+              </FadeAnimation>
+            </>
+          )}
         </div>
       </section>
 
@@ -172,9 +145,9 @@ const Works = () => {
           <FadeAnimation className="section__title ">أعجبتكم أعمالنا؟</FadeAnimation>
           <FadeAnimation className="section__text ">احجزوا جلستكم الآن ولنصنع سوياً لحظة تستحق التوثيق.</FadeAnimation>
           <FadeAnimation className="cta-final__row ">
-            <a href="#" data-page="booking" className="btn btn--primary">
+            <Link to="/booking" data-page="booking" className="btn btn--primary">
               احجزي موعدك الآن
-            </a>
+            </Link>
           </FadeAnimation>
         </div>
       </section>

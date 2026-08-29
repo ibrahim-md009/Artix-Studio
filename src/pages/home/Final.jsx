@@ -1,4 +1,5 @@
 import FadeAnimation from "../../components/ui/FadeAnimation";
+import { Link } from "react-router-dom";
 
 const Final = () => {
   return (
@@ -11,9 +12,9 @@ const Final = () => {
           احجزوا موعدكم خلال دقيقة، ونرسل لكم التأكيد مباشرة على واتساب.
         </FadeAnimation>
         <FadeAnimation className="cta-final__row ">
-          <a href="#" data-page="booking" className="btn btn--primary">
+          <Link to="/booking" data-page="booking" className="btn btn--primary">
             احجزي موعدك الآن
-          </a>
+          </Link>
         </FadeAnimation>
       </div>
     </section>
