@@ -7,6 +7,9 @@ const News = () => {
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // عارض الصور الكبير (نفس ستايل صفحة الأعمال)
+  const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -20,6 +23,44 @@ const News = () => {
     };
     getData();
   }, []);
+
+  // توافق مع أي مستند قديم (imageUrl/images) + الشكل الجديد من الداشبورد (mainImage/subImages)
+  const getMainImage = (item) => item.mainImage || item.imageUrl || null;
+  const getSubImages = (item) => item.subImages || item.images || [];
+
+  const openGallery = (item) => {
+    const images = [getMainImage(item), ...getSubImages(item)].filter(Boolean);
+    setLightbox({ open: true, images, index: 0 });
+    document.body.classList.add("no-scroll");
+  };
+
+  const closeLightbox = () => {
+    setLightbox((s) => ({ ...s, open: false }));
+    document.body.classList.remove("no-scroll");
+  };
+
+  const goPrev = () =>
+    setLightbox((s) => ({
+      ...s,
+      index: (s.index - 1 + s.images.length) % s.images.length,
+    }));
+
+  const goNext = () =>
+    setLightbox((s) => ({
+      ...s,
+      index: (s.index + 1) % s.images.length,
+    }));
+
+  useEffect(() => {
+    if (!lightbox.open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox.open, lightbox.images.length]);
 
   return (
     <section id="page-news">
@@ -35,22 +76,43 @@ const News = () => {
             {loading ? (
               <p className="empty-msg">جاري تحميل الأخبار...</p>
             ) : (
-              newsData.map((item) => (
-                <FadeAnimation key={item.id} className="news-item">
-                  <div className="news-item__media">
-                    <img src={item.imageUrl} alt={item.mainDesc} loading="lazy" />
-                    {item.createdAt && (
-                      <span className="news-item__date">
-                        {item.createdAt.toDate().toLocaleDateString("ar-EG", { year: "numeric", month: "long" })}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="news-item__title">{item.mainDesc || "(بدون عنوان)"}</h3>
-                    <p className="news-item__text">{item.subDesc}</p>
-                  </div>
-                </FadeAnimation>
-              ))
+              newsData.map((item) => {
+                const mainImage = getMainImage(item);
+                const subImages = getSubImages(item);
+                return (
+                  <FadeAnimation key={item.id} className="news-item">
+                    <div className="news-item__media">
+                      {mainImage && <img src={mainImage} alt={item.mainDesc} loading="lazy" />}
+                      {item.createdAt && (
+                        <span className="news-item__date">
+                          {item.createdAt.toDate().toLocaleDateString("ar-EG", { year: "numeric", month: "long" })}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="news-item__title">{item.mainDesc || "(بدون عنوان)"}</h3>
+                      <p className="news-item__text">{item.subDesc}</p>
+
+                      {subImages.length > 0 && (
+                        <button type="button" className="news-item__viewall" onClick={() => openGallery(item)}>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="3" y="3" width="13" height="13" rx="2" />
+                            <path d="M8 21h10a2 2 0 0 0 2-2V9" />
+                          </svg>
+                          عرض كل الصور
+                        </button>
+                      )}
+                    </div>
+                  </FadeAnimation>
+                );
+              })
             )}
           </div>
         </div>
@@ -75,6 +137,40 @@ const News = () => {
           </FadeAnimation>
         </div>
       </section>
+
+      {/* ============ عارض الصور الكبير ============ */}
+      {lightbox.open && (
+        <div className="lightbox is-active" aria-hidden="false">
+          <button className="lightbox__close" aria-label="إغلاق" onClick={closeLightbox}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+
+          {lightbox.images.length > 1 && (
+            <>
+              <button className="lightbox__arrow lightbox__arrow--next" aria-label="الصورة التالية" onClick={goNext}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+              <button className="lightbox__arrow lightbox__arrow--prev" aria-label="الصورة السابقة" onClick={goPrev}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          <div className="lightbox__image" style={{ backgroundImage: `url('${lightbox.images[lightbox.index]}')` }} />
+
+          {lightbox.images.length > 1 && (
+            <span className="lightbox__count">
+              {lightbox.index + 1} / {lightbox.images.length}
+            </span>
+          )}
+        </div>
+      )}
     </section>
   );
 };
