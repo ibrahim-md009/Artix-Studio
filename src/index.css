@@ -2119,3 +2119,48 @@ body {
     font-size: 0.74rem;
   }
 }
+
+/* ---------- عارض الصور: وضع التمرير العمودي (لـ "عرض كل الصور" بالأخبار) ---------- */
+.lightbox--scroll {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.lightbox--scroll .lightbox__scroll-viewport {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 80px 16px 60px;
+}
+.lightbox--scroll .lightbox__scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.lightbox--scroll .lightbox__scroll-item {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(251, 249, 243, 0.05);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+.lightbox--scroll .lightbox__scroll-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 640px) {
+  .lightbox--scroll .lightbox__scroll-viewport {
+    padding: 70px 10px 40px;
+  }
+  .lightbox--scroll .lightbox__scroll-list {
+    gap: 16px;
+  }
+  .lightbox--scroll .lightbox__scroll-item {
+    border-radius: 14px;
+  }
+}
