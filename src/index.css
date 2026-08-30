@@ -2068,3 +2068,54 @@ body {
 .send-whats {
   font-size: 10px;
 }
+
+/* ---------- زر "عرض كل الصور" بمنشور الأخبار ---------- */
+.news-item__viewall {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid var(--olive-dark);
+  color: var(--olive-dark);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+.news-item__viewall svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.news-item__viewall:hover {
+  background: var(--olive-dark);
+  color: var(--white-soft);
+  transform: translateY(-2px);
+}
+
+/* ---------- عداد الصور بعارض الصورة الكبيرة ---------- */
+.lightbox__count {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(251, 249, 243, 0.14);
+  border: 1px solid rgba(251, 249, 243, 0.3);
+  color: var(--white-soft);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 6px 16px;
+  border-radius: 20px;
+  direction: ltr;
+  unicode-bidi: isolate; /* حتى ما ينعكس "1/5" بسبب اتجاه RTL */
+  z-index: 2;
+}
+@media (max-width: 640px) {
+  .lightbox__count {
+    bottom: 14px;
+    font-size: 0.74rem;
+  }
+}
